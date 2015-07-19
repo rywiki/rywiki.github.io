@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Wiki in box</title>
+		<title>遗物集</title>
 
 		<!-- Bootstrap -->
 		<link href="files/css/bootstrap.min.css" rel="stylesheet">
@@ -113,7 +113,7 @@
 						// 设置页面标题
 						pagetitle=$("#content").find(":header:first").text();
 						if(pagetitle != ""){
-							$("title").text(pagetitle + " - Wiki in box");
+							$("title").text(pagetitle + " - 遗物集");
 						}
 					}
 				});
@@ -128,12 +128,12 @@
 	</head>
 	<body>
 		<div id="header">
-			<a href="index.html"><h1>Wiki in box</h1></a>
+			<a href="index.html"><h1>遗物集</h1></a>
 		</div> <!-- #header End -->
 		<div id="main" class="container">
 			<div class="row">
-				<div class="col-md-8 col-md-offset-2">
-				    <div id="toc"></div>
+				<div class="col-md-8 col-md-offset-3">
+				    <div id="toc" class="col-md-8"></div>
 					<div id="content">
 						Loading……
 					</div>
