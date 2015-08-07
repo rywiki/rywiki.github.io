@@ -752,6 +752,7 @@ InlineLexer.prototype.mangle = function(text) {
 
 function Renderer(options) {
   this.options = options || {};
+  this.headernum=[0,0,0,0,0,0,0];
 }
 
 Renderer.prototype.code = function(code, lang, escaped) {
@@ -784,14 +785,32 @@ Renderer.prototype.blockquote = function(quote) {
 Renderer.prototype.html = function(html) {
   return html;
 };
-
+Renderer.prototype.getHeadingNum=function(level){
+	
+	return this.headernum.slice(0,level).join(".")+" ";
+	
+}
+Renderer.prototype.addHeadingNum=function(level){
+	
+	this.headernum[level-1]++;
+	for(var i=level;i<this.headernum.length;i++){
+		
+		this.headernum[i]=0;
+	}
+	return;
+	
+}
 Renderer.prototype.heading = function(text, level, raw) {
+	this.addHeadingNum(level);
+	console.log(this.options);
   return '<h'
     + level
     + ' id="'
     + this.options.headerPrefix
-    + raw.toLowerCase().replace(/[^\w]+/g, '-')
+   // + raw.toLowerCase().replace(/[^\w]+/g, '-')
+    + raw.toLowerCase().replace(/[\.\s]+/g, '-')
     + '">'
+	+ (this.options.isaddheadernum?this.getHeadingNum(level):"")
     + text
     + '</h'
     + level
