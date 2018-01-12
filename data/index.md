@@ -2,7 +2,7 @@
 首页
 ===
 
-一个可以放在各种网盘，各种空间的，Markdown 语法支持的 Wiki 系统，可以用来方便的管理自己的知识碎片。欢迎各种支持～
+关于所收集的电子书的相关资料
 
 [Github 项目页](https://github.com/dmscode/Wiki-in-box)
 
@@ -20,9 +20,6 @@
 
 ## 软件资源 ##
 
-	<script>
-		alert('Hello, World!')
-	</script>
 
 ## 资源连接 ##
 
