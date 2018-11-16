@@ -4,7 +4,9 @@
 
 关于所收集的电子书的相关资料
 
-[Github 项目页](https://github.com/dmscode/Wiki-in-box)
+[项目页](https://github.com/dmscode/Wiki-in-box)
+/[帮助页](help)
+
 
 ## 图书目录 ##
 
