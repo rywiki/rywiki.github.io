@@ -6,7 +6,18 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>SMS Receiver</title>
     <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
-    <script>
+   
+</head>
+<body>
+    <div id='app'>
+        <ul v-for="item in list">
+            <li><h3>{{item.num}}</h3><a :href="rootpath+item.url"></a></li>
+        </ul>
+
+    </div>
+</body>
+</html>
+ <script>
     var app4 = new Vue({
   el: '#app',
   data: {
@@ -18,13 +29,3 @@
   }
 })
     </script>
-</head>
-<body>
-    <div id='app'>
-        <ul v-for="item in list">
-            <li><h3>{{item.num}}</h3><a :href="rootpath+item.url"></a></li>
-        </ul>
-
-    </div>
-</body>
-</html>
