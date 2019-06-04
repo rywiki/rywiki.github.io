@@ -11,7 +11,7 @@
 <body>
     <div id='app'>
         <ul v-for="item in list">
-            <li><h3>{{item.num}}</h3><a :href="rootpath+item.url"></a></li>
+            <li><a :href="rootpath+item.url">Read</a>|<h3>{{item.num}}</h3></li>
         </ul>
 
     </div>
