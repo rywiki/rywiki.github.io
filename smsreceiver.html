@@ -1,1 +1,30 @@
-<h1>SMS Receiver</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>SMS Receiver</title>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+    <script>
+    var app4 = new Vue({
+  el: 'app',
+  data: {
+      rootpath:" https://www.pdflibr.com",
+    list: [
+{"num":"+8619965412404","url":"/SMSContent/1"},{"num":"17127290867","url":"/SMSContent/3"},{"num":"17127290868","url":"/SMSContent/4"},{"num":"+8617124267535","url":"/SMSContent/5"},{"num":"17124267519","url":"/SMSContent/7"},{"num":"+639777513454","url":"/SMSContent/9"},{"num":"+8617034662088","url":"/SMSContent/11"},{"num":"+8616739465449","url":"/SMSContent/15"},{"num":"+8617157721142","url":"/SMSContent/17"},{"num":"+8615263819415","url":"/SMSContent/19"},{"num":"+8617034662070","url":"/SMSContent/21"},{"num":"+8617034662059","url":"/SMSContent/23"},{"num":"+8617157721141","url":"/SMSContent/25"},{"num":"+8617157721140","url":"/SMSContent/27"},{"num":"17128240149","url":"/SMSContent/31"},{"num":"17128240204","url":"/SMSContent/32"},{"num":"17128240194","url":"/SMSContent/33"},{"num":"17128240184","url":"/SMSContent/34"},{"num":"17128240042","url":"/SMSContent/35"},{"num":"17128240174","url":"/SMSContent/36"},{"num":"17128240043","url":"/SMSContent/37"},{"num":"17128240164","url":"/SMSContent/38"},{"num":"17128240045","url":"/SMSContent/39"},{"num":"17128240154","url":"/SMSContent/40"},{"num":"17128240034","url":"/SMSContent/41"},{"num":"17157721545","url":"/SMSContent/42"},{"num":"17128240241","url":"/SMSContent/45"},{"num":"17128240148","url":"/SMSContent/46"},{"num":"17128240046","url":"/SMSContent/47"},{"num":"17157727034","url":"/SMSContent/48"},{"num":"17128240047","url":"/SMSContent/49"},{"num":"17128240224","url":"/SMSContent/50"},{"num":"17128240214","url":"/SMSContent/51"},{"num":"17128240242","url":"/SMSContent/52"},{"num":"17128240041","url":"/SMSContent/53"},{"num":"17128240040","url":"/SMSContent/54"},{"num":"18866674180","url":"/SMSContent/55"},{"num":"15263819410","url":"/SMSContent/56"},{"num":"16739465440","url":"/SMSContent/57"},{"num":"16739465443","url":"/SMSContent/58"},{"num":"18866674203","url":"/SMSContent/59"},{"num":"18866674210","url":"/SMSContent/60"},{"num":"18866479341","url":"/SMSContent/61"},{"num":"16739465446","url":"/SMSContent/62"},{"num":"16739465442","url":"/SMSContent/63"},{"num":"18866478743","url":"/SMSContent/64"},{"num":"15263819432","url":"/SMSContent/65"},{"num":"15263819409","url":"/SMSContent/66"},{"num":"18866674215","url":"/SMSContent/67"},{"num":"18866478524","url":"/SMSContent/68"},{"num":"16739465439","url":"/SMSContent/69"},{"num":"18866674223","url":"/SMSContent/70"},{"num":"18866478849","url":"/SMSContent/71"},{"num":"18866674213","url":"/SMSContent/72"},{"num":"16739465448","url":"/SMSContent/73"}
+]
+
+  }
+})
+    </script>
+</head>
+<body>
+    <div id='app'>
+        <ul v-for="item in list">
+            <li><h3>{{item.num}}</h3><a :href="rootpath+item.url"></a></li>
+        </ul>
+
+    </div>
+</body>
+</html>
