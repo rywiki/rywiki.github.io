@@ -17,6 +17,7 @@
     Address:<input type="text" id="url" placeholder="a url that you like"><button onclick='return go_clicked();'>go</button>
     <a onclick='return showCss();' href="#">CSS</a>
     <a onclick='return showHelp();'  href="#">Help</a>
+    a id='download'  href="#">Download PDF</a>
     <iframe id='viewer' src="" frameborder="0"></iframe>
    
 </body>
@@ -28,6 +29,7 @@ function go_clicked(){
         let u=url.value;
         let add=`https://percollate-api.herokuapp.com/load.html?url=${u}&css=${cssstr}`;
         viewer.src=add;
+        download.href=add;
     }
 }
 function showCss(){
@@ -77,4 +79,7 @@ function showHelp(){
   }
 }); 
 }
+    function resize(){viewer.style.height=(this.innerHeight-40)+'px';viewer.style.width=(this.innerWidth-30)+'px';}
+resize();
+window.onresize = resize;
 </script>
