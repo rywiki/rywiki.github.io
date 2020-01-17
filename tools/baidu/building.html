@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<style type="text/css">
+	body, html{width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑";}
+    #allmap {width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑";}
+    #out{display:none; width: 100%;height: 50%;overflow: scroll;margin:0;font-family:"微软雅黑";}
+    #range{width:600px;}
+	</style>
+    <script type="text/javascript" src="//api.map.baidu.com/api?type=webgl&v=1.0&ak=E4805d16520de693a3fe707cdc962045"></script>
+    <script type="text/javascript" src="./projconvert.js"></script>
+	<title>地图展示</title>
+</head>
+<body>
+    Range:<input type="checkbox" id='eanblerange' value='false'><input id='range' type="text" value='' ><button id='goover' onclick='return auto();' disabled >GO</button><button onclick='map.zoomTo(18);'>zoom to 18</button>
+    Enable: <input type="checkbox" id='enablepost' value='false'><span id='notetxt'></span>
+    <div id="allmap"></div>
+    <textarea id="out"></textarea>
+</body>
+</html>
+<script type="text/javascript">
+/* 
+这个页面实现了将百度地图中的webgl地图建筑轮廓数据解析为平面三角面和高度并提交到后台的服务器保存为geojson文件，通过后续的
+加工可以获得建筑轮廓用于生成3d建筑。 
+Note：
+1、服务器采用简单文件而不采用数据库的原因是文件读写速度快，不需要考虑并发执行的问题
+2、直接访问了百度地图的WorkerManager，并在Worker的onmessage事件中获取解析后3d顶点数据转换为二维数据。
+*/
+
+// 在这个函数中，根据给定范围进行遍历设置，然后自动地浏览整个范围中的区域，以达到自动提交的目的；
+let steps=[],timer=null;
+function auto(){
+// todo
+// 计算要遍历的范围的墨卡托坐标
+let psMC=BMapGL.Project.convertLL2MC(ps),peMC=BMapGL.Project.convertLL2MC(pe);
+
+// 按照当前显示范围的分辨率计算每步的范围
+let mw=map.width*0.9,mh=map.height*0.9;
+let hstep=Math.ceil(Math.abs(peMC.lat-psMC.lat)/mh),wstep=Math.ceil(Math.abs(peMC.lng-psMC.lng)/mw);
+// 计算所需的步骤中心点，压栈
+if(ps.lng>pe.lng){let t=ps.lng;ps.lng=pe.lng;pe.lng=t;}
+if(ps.lat>pe.lat){let t=ps.lat;ps.lat=pe.lat;pe.lat=t;}
+let steplenw=Math.abs(ps.lng-pe.lng)/wstep,steplenh=Math.abs(ps.lat-pe.lat)/hstep;
+for(let i=ps.lng;i<pe.lng;i+=steplenw){
+        for(let j=ps.lat;j<pe.lat;j+=steplenh){
+        steps.push(new BMapGL.Point(i,j));
+    }    
+}
+// 开启捕捉模式
+map.zoomTo(18);
+enablepost.checked = true;
+inject();
+// 开始遍历
+timer=setInterval(function(){
+    if(steps.length==0){ clearInterval(timer);return;};
+    map.panTo(steps.pop());
+    notetxt.innerText='还剩'+steps.length+"步，剩余时间大约"+(((steps.length*3)>=60)?((steps.length)/20 + "分"):((steps.length*3) + "秒"));
+},3000)
+
+}
+    
+    // 将矢量瓦片局部坐标转换为baidu09经纬度坐标
+    function getbd09Coord(x,y,col,row,zoom){
+        let dp=Math.pow(2,18-zoom),ts=1024;       
+        let lnglat = new BMapGL.Point((x+col*ts)*dp, (y+row*ts)*dp);
+        let point =BMapGL.Project.convertMC2LL(lnglat);
+        return point;
+    }
+    // 将矢量瓦片局部坐标转换为wgs84经纬度坐标
+    function getCoord(x,y,col,row,zoom){
+        let dp=Math.pow(2,18-zoom),ts=1024;       
+        let lnglat = new BMapGL.Point((x+col*ts)*dp, (y+row*ts)*dp);
+        let point =BMapGL.Project.convertMC2LL(lnglat);
+        return bd09towgs84( point.lng,point.lat);
+    }
+    // 函数:将建筑顶点缓冲转换为平面多边形和高度属性
+    function buildingPlaned(d){   
+        let vs=d.building3d.vertex,is=d.building3d.index,ps=[],polygons=[];
+        let info=d.tileInfo ;        
+        // 7元组，只保留前三个，其他的为法线，舍弃
+        for(let i=0;i<vs.length/7;i++){            
+            let mkt;
+            // 如果是底层顶点就不做坐标转换了
+            if (vs[i*7+2]!=0) mkt=getCoord(vs[i*7],vs[i*7+1],info.col,info.row,info.zoom);
+            else mkt=[0,0];
+            ps.push([parseFloat(mkt[0].toFixed(7)),parseFloat(mkt[1].toFixed(7)),vs[i*7+2]]);
+        }
+        // 索引位三个一组构成三角面
+        for(let i=0;i<is.length/3;i++){
+            // 剔除包含底层的三角面，仅保留建筑顶层
+            if(ps[is[i*3]][2]==0||ps[is[i*3+1]][2]==0||ps[is[i*3+2]][2]==0) continue;
+            let ns=[];
+            ns.push(is[i*3]);
+            ns.push(is[i*3+1]);
+            ns.push(is[i*3+2]);
+            polygons.push(ns);           
+        }   
+        let fc={ type: "FeatureCollection",crs: {type: "EPSG",properties: { code: 4326,coordinate_order: [1, 0]}},features:[]}; 
+      for(let i=0;i<polygons.length;i++){
+         let ns=polygons[i];
+        // 二维节点集合和高度
+         let p2s=[],h=ps[ns[0]][2];         
+          for( let j in ns){ 
+              p2s.push(ps[ns[j]].slice(0,2));
+          }
+          p2s.push(p2s[0]);         
+          fc.features.push({
+              type:"Feature",
+              id:i,
+              geometry:{type:"Polygon",coordinates:[p2s]},
+              properties:{Name:info.col + "-"+info.row + '-'+i,height:h}});
+      }
+    //   输出生成的json
+      return JSON.stringify(fc);
+    }
+    function workerListener(event){ 
+                // 如果不启用就不提交
+                if (!enablepost.checked ) return;
+                if(event.data.building3d!=null&&event.data.tileInfo.zoom==19 )
+                {
+                    let x=event.data.tileInfo.col,y=event.data.tileInfo.row,z=event.data.tileInfo.zoom;  
+                    // 如果生成过了，不再进行解析      
+                    if(tiles.indexOf(x+'_'+y)>-1)return;
+                let data= buildingPlaned({tileInfo:event.data.tileInfo,building3d:event.data.building3d});            
+                    let xhr=new XMLHttpRequest();
+                    xhr.open('POST','./buildingreceiver.php?n='+x+'_'+y,true);
+                    xhr.onreadystatechange = function() {  if (this.readyState === XMLHttpRequest.DONE && this.status === 200) { console.log(this.response);}}
+                    xhr.send(data); 
+                    tiles.push(x+'_'+y);
+                    // 对浏览过的瓦片进行标记
+                    let pStart=getbd09Coord(0,0,x,y,z),pEnd=getbd09Coord(1023,1023,x,y,z);
+                    let rectangle = new BMapGL.Polygon([
+                        new BMapGL.Point(pStart.lng,pStart.lat),
+                        new BMapGL.Point(pEnd.lng,pStart.lat),
+                        new BMapGL.Point(pEnd.lng,pEnd.lat),
+                        new BMapGL.Point(pStart.lng,pEnd.lat)
+                    ], {strokeColor:"blue", strokeWeight:2, strokeOpacity:0.5});  //创建矩形
+                    map.addOverlay(rectangle); 
+                }
+            };
+    function inject(){
+	map._workerMgr.arrWorker.forEach((a,i)=>{
+            a.addEventListener('message', workerListener );
+        });
+    }
+    var tiles=[];
+	var map = new BMapGL.Map("allmap");    // 创建Map实例
+
+
+map.centerAndZoom(new BMapGL.Point(103.10490165585117,39.76485689980563), 5);  // 初始化地图,设置中心点坐标和地图级别
+map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+let ps,pe,rectRange=null;
+function drawRange(pStart,pEnd){
+    rectRange = new BMapGL.Polygon([
+                new BMapGL.Point(pStart.lng,pStart.lat),
+                new BMapGL.Point(pEnd.lng,pStart.lat),
+                new BMapGL.Point(pEnd.lng,pEnd.lat),
+                new BMapGL.Point(pStart.lng,pEnd.lat)
+            ], {strokeColor:"red", strokeWeight:2, strokeOpacity:0.5});  //创建矩形
+    map.addOverlay(rectRange); 
+}
+map.addEventListener('mousedown', function(e) {   
+    if(eanblerange.checked)
+    if (range.value==''||range.value.indexOf(',')>-1 ){
+        if  (rectRange!=null) map.removeOverlay(rectRange);
+        goover.disabled=true;
+        range.value=e.latlng.lng +' '+e.latlng.lat;  
+        ps=e.latlng;
+    }
+    else{
+        goover.disabled=false;
+        range.value= range.value + "," + e.latlng.lng +' '+e.latlng.lat;   
+        pe=e.latlng;
+         drawRange(ps,pe);
+        }
+    });
+ 
+</script>
