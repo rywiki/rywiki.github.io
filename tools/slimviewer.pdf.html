@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Slim Viewer</title>
+    <style>
+    #url{width: 500px;}
+    #viewer{width:100%;top:30px;bottom:10px;}
+    #css{width:280px;height:200px;overflow:auto;}
+    </style>
+    <script src="//cdn.staticfile.org/jquery/1.9.0/jquery.js"></script>
+    <script src="//cdn.bootcss.com/layer/2.3/layer.js"></script>
+</head>
+<body>
+    Address:<input type="text" id="url" placeholder="a url that you like"><button onclick='return go_clicked();'>go</button>
+    <a onclick='return showCss();' href="#">CSS</a>
+    <a onclick='return showHelp();'  href="#">Help</a>
+    <iframe id='viewer' src="" frameborder="0"></iframe>
+   
+</body>
+</html>
+<script>
+var cssorig=cssstr='html,body {width:100%;margin:0px;padding:0px;}'
+function go_clicked(){
+    if(url.value.trim()!=''){   
+        let u=url.value;
+        let add=`https://percollate-api.herokuapp.com/load.pdf?url=${u}&css=${cssstr}`;
+        viewer.src=add;
+    }
+}
+function showCss(){
+    layer.open({
+  type: 1
+  ,title: false //不显示标题栏
+  ,closeBtn: false
+  ,area: '300px;'
+  ,shade: 0.8
+  ,id: 'LAY_Help' //设定一个id，防止重复弹出
+  ,resize: false
+  ,btn: ['Ok', 'Cancle']
+  ,btnAlign: 'c'
+  ,moveType: 1 //拖拽模式，0或者1
+  ,content: `<div style="padding: 5px; line-height: 22px; background-color: #f9fDf9; color: #fff;"><textarea id="css">${cssstr}</textarea></div>`
+  ,success:function(l){
+    $('.layui-layer-btn2').on('click',function(e){document.querySelector('textarea#css').value=window.cssorgi;});
+  }
+  ,yes: function(index){
+   window.cssstr=document.querySelector('textarea#css').value;
+      layer.close(index);
+  }
+});
+}
+function showHelp(){
+    layer.open({
+  type: 1
+  ,title: false //不显示标题栏
+  ,closeBtn: false
+  ,area: '300px;'
+  ,shade: 0.8
+  ,id: 'LAY_Help' //设定一个id，防止重复弹出
+  ,resize: false
+  ,btn: ['Ok']
+  ,btnAlign: 'c'
+  ,moveType: 1 //拖拽模式，0或者1
+  ,content: `<pre id='helptxt'>
+  Paste url in text box and click 
+  button(go),you will see a clean 
+  page with content.If you like ,
+  you can change css string for 
+    more styles.
+    </pre>`
+  ,yes: function(index){
+  
+      layer.close(index);
+  }
+}); 
+}
+</script>
